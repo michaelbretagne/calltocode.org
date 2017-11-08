@@ -9,43 +9,49 @@ import styles from '../LoginForm/LoginForm.scss'
 import { signup } from '../../actions'
 
 function EmailField ({ input, meta: { error } }) {
-  return [
-    <input key="field"
-      className={styles.inputEmail}
-      placeholder="Email"
-      {...input} />,
+  const emailClasses = `${styles.inputEmailContainer} ${error ? styles.error : styles.valid}`
 
-    <div key="error">
+  return [
+    <div key="mailContainer" className={emailClasses}>
+      <input key="field"
+        className={styles.inputEmailWithError}
+        placeholder="Email"
+        {...input } />
+      <div key="valid" className={error ? styles.cross : styles.tick}></div>
+    </div>,
+    <div key="error" className={styles.inputEmailError}>
       {error}
     </div>
+
   ]
 }
 
 function PasswordField ({ input, meta: { error, active } }) {
+  const passClasses = `${styles.inputPassword} ${error ? styles.error : styles.valid}`
+
   return [
     <input key="field"
-      className={styles.inputPassword}
+      className={passClasses}
       type="password"
       placeholder="Password"
       {...input} />,
-    <span key="valid" className={error ? styles.cross : styles.tick}></span>,
     <Field key="popup" name="popup"
       component={ValidationPopup} active={active} error={error} />
   ]
 }
 
-const ValidationPopup = ({error, active}) => {
+const ValidationPopup = ({ error, active }) => {
   return (
-    <div className={`${styles.validpopup} ${active && error ? styles.show : styles.hide}` }>
+    <div className={`${styles.validpopup} ${active ? styles.show : styles.hide}` }>
       <p className={styles.bold}>Password must have</p>
       <ul>
-        <li className={ error && error.upperCase ? styles.tick : styles.cross }> at least 1 UpperCase Character </li>
-        <li className={ error && error.lowerCase ? styles.tick : styles.cross }> at least 1 LowerCase Character </li>
-        <li className={ error && error.hasOneDigit ? styles.tick : styles.cross }> at least 1 Number </li>
-        <li className={ error && error.hasSpecialChar ? styles.tick : styles.cross }> at least 1 Special Character </li>
-        <li className={ error && error.minLength ? styles.tick : styles.cross }> at least 10 Characters </li>
-        <li className={ error && error.maxLength ? styles.tick : styles.cross }> at most 128 Characters </li>
-        <li className={ error && error.noIdenticalChars ? styles.tick : styles.cross }> not more than 2 identical characters in a row </li>
+        <li className={ error == null || error.upperCase ? styles.tick : styles.cross }> at least 1 UpperCase Character </li>
+        <li className={ error == null || error.lowerCase ? styles.tick : styles.cross }> at least 1 LowerCase Character </li>
+        <li className={ error == null || error.hasOneDigit ? styles.tick : styles.cross }> at least 1 Number </li>
+        <li className={ error == null || error.hasSpecialChar ? styles.tick : styles.cross }> at least 1 Special Character </li>
+        <li className={ error == null || error.minLength ? styles.tick : styles.cross }> at least 10 Characters </li>
+        <li className={ error == null || error.maxLength ? styles.tick : styles.cross }> at most 128 Characters </li>
+        <li className={ error == null || error.noIdenticalChars ? styles.tick : styles.cross }> not more than 2 identical characters in a row </li>
       </ul>
     </div>
   )
