@@ -1,16 +1,58 @@
 #!/usr/bin/env bash
 
-echo 'Stopping and removing docker container..'
-CONTAINER_ID=$(docker ps --quiet --filter ancestor=mongo)
-docker stop $CONTAINER_ID && docker rm $CONTAINER_ID
+set +x -eu -o pipefail
 
-set -e
+DB=mongo
+NAME=c4sg
+ID_FROM_DB=$(docker ps -aq -f ancestor=$DB)
+ID_FROM_NAME=$(docker ps -aq -f name=$NAME)
 
-echo 'Starting new docker container with MongoDB..'
-docker run --name c4sg -d -p 27017:27017 -p 28017:28017 mongo
+start () {
+  # Make sure a container isn't already running
+  if [[ -z "$ID_FROM_DB" && -z "$ID_FROM_NAME" ]] ; then
+    echo "Starting new docker container with MongoDB.."
+    docker run --name $NAME -d -p 27017:27017 -p 28017:28017 $DB | xargs echo "Started container"
 
-echo "Adding seed data to MongoDB.."
-docker cp ./db/seedData/users.json c4sg:users.json
-docker cp ./db/seedData/projects.json c4sg:projects.json
-docker exec c4sg mongoimport --db admin --collection users --file users.json
-docker exec c4sg mongoimport --db admin --collection projects --file projects.json
+    echo "Copying seed data to docker container.."
+    docker cp ./db/seedData/users.json $NAME:users.json
+    docker cp ./db/seedData/projects.json $NAME:projects.json
+
+    echo "Adding seed data to MongoDB.."
+    docker exec $NAME mongoimport --db admin --collection users --file users.json --type json --jsonArray
+    docker exec $NAME mongoimport --db admin --collection projects --file projects.json --type json --jsonArray
+  else
+    echo "Skipping start, container already running"
+    exit 0
+  fi
+}
+
+stop () {
+  # Make sure there's a container to stop
+  if [[ ! -z "$ID_FROM_DB" ]] ; then
+    ID=$ID_FROM_DB
+  elif [[ ! -z "$ID_FROM_NAME" ]] ; then
+    ID=$ID_FROM_NAME
+  else
+    echo "Skipping stop and remove, no container found"
+    exit 0
+  fi
+
+  echo "Stopping and removing docker container.."
+  docker stop $ID | xargs echo "Stopped container"
+  docker rm $ID | xargs echo "Removed container"
+}
+
+info () {
+cat <<EOF
+  Usage: ./db/run.sh <target>
+  Targets:
+    start - start a docker container with seeded MongoDB
+    stop - stop and remove the docker container
+EOF
+}
+
+case $1 in
+  start)    start    ;;
+  stop)     stop     ;;
+  *)        info     ;;
+esac
