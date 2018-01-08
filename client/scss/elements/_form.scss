@@ -1,0 +1,53 @@
+@import '../../scss/partials/partials';
+
+%form {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  grid-template-rows: auto;
+  grid-row-gap: 15px;
+  padding: 20px 60px;
+}
+
+%formTitle {
+  font-size: 3rem;
+  margin-bottom: 15px;
+}
+
+%formTitleSecondary {
+  font-size: 1.5rem;
+  margin-bottom: 15px;
+}
+
+%fieldText {
+  padding: 10px 5px;
+  font-size: 1rem;
+}
+
+%checkboxContainer {
+  @extend %fieldText;
+  display: inline;
+  padding: 0;
+
+  label {
+    position: relative;
+    top: -2px;
+  }
+}
+
+%checkbox {
+  width: 18px;
+  height: 18px;
+  margin-right: 10px;
+  border: 1px solid $inputsBorderColor;
+  box-shadow: none;
+
+  &:checked:after {
+    font-size: 25px;
+  }
+}
+
+%buttonSubmit {
+  @extend %button;
+  padding: 20px;
+  background-color: #36E671;
+}
