@@ -1,9 +1,8 @@
 @import '../../scss/partials/partials';
 
 .header {
-  padding: 10px 60px;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
+  width: 100%;
+  margin-bottom: 2px;
 
   &:after {
     content: '';
@@ -17,21 +16,15 @@
 }
 
 .button {
-  padding: 10px;
-  margin-left: 10px;
-  color: dimgray;
+  &.active, &:active {
+    @extend %buttonActive;
+  }
 
-  &:active {
-    color: royalblue;
+  &:hover {
+    @extend %hover;
   }
 }
 
-.buttons {
-  text-align: right;
-  align-self: center;
-}
-
-.logo {
-  height: 42px;
-  align-self: center;
+.flex {
+  flex: 1;
 }

@@ -1,17 +1,15 @@
 import React, { Component } from 'react'
 import { connect } from 'react-redux'
 import { Field, reduxForm } from 'redux-form'
-import { push } from 'react-router-redux'
 import PropTypes from 'prop-types'
 
 import SignupValidator from '../SignupForm/SignupValidator'
 import ValidationPopup from '../SignupForm/ValidationPopup'
-import styles from './NewPasswordForm.scss'
-import AuthActionCreator from '../../actions/auth'
+import styles from './ForgotPasswordForm.scss'
 
 class NewPasswordForm extends Component {
   renderPassword (field) {
-    const passClasses = `${styles.inputPassword} 
+    const passClasses = `${styles.inputPassword}
                          ${field.meta.pristine ? '' : (field.meta.error ? styles.error : styles.valid)}`
     return (
       <div className={ styles.inputPasswordContainer }>
@@ -29,29 +27,20 @@ class NewPasswordForm extends Component {
     )
   }
 
-  customSubmit (values) {
-    const { password } = values
-
-    // hardcoded the email, will be changed after the implementation of Forgot Password verification page
-    // const { email } = this.props
-    let { email } = this.props
-    if (!email) email = 'kevin@email.com'
-
-    this.props.changePassword({ email, password })
-  }
-
   render () {
     const { handleSubmit } = this.props
 
     return (
-      <form className={styles.form} onSubmit={handleSubmit(this.customSubmit.bind(this))}>
-        <h1 className={styles.title}>New Password</h1>
-
+      <form className={styles.form} onSubmit={handleSubmit}>
+        <h1 className={styles.h1}>New Password</h1>
+        <h3 className={styles.h3}>Set your new password</h3>
         <Field
           name="password"
+          value={this.props.password}
+          onChange={this.props.onChangePassword}
           component={this.renderPassword}
           validate={SignupValidator.validatePassword} />
-        <button className={styles.buttonSubmit} type="submit">
+        <button className={styles.buttonSubmit} disabled={this.props.password.length === 0} type="submit">
           Change Password
         </button>
       </form>
@@ -59,25 +48,16 @@ class NewPasswordForm extends Component {
   }
 }
 
-const mapDispatchToProps = {
-  changePassword: AuthActionCreator.changePassword
-}
-
-function mapStateToProps (state) {
-  return {
-    email: state.email
-  }
-}
-
 NewPasswordForm.propTypes = {
-  changePassword: PropTypes.func,
   handleSubmit: PropTypes.func,
-  email: PropTypes.object
+  onChangePassword: PropTypes.func.isRequired,
+  password: PropTypes.string.isRequired
 }
 
 const NewPasswordFormRedux = reduxForm({
-  form: 'NewPasswordForm',
-  onSubmitSuccess: (result, dispatch) => dispatch(push('/'))
+  form: 'ForgotPasswordForm',
+  destroyOnUnmount: false,
+  forceUnregisterOnUnmount: true
 })(NewPasswordForm)
 
-export default connect(mapStateToProps, mapDispatchToProps)(NewPasswordFormRedux)
+export default connect(null)(NewPasswordFormRedux)

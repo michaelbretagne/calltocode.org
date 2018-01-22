@@ -1,7 +1,12 @@
-import React, { Component } from 'react'
+import React, { Component, Fragment } from 'react'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import PropTypes from 'prop-types'
+import AppBar from 'material-ui/AppBar'
+import Toolbar from 'material-ui/Toolbar'
+import Typography from 'material-ui/Typography'
+import Button from 'material-ui/Button'
+import Avatar from 'material-ui/Avatar'
 
 import AuthActionCreator from '../../actions/auth'
 import styles from './Header.scss'
@@ -11,40 +16,76 @@ class Header extends Component {
     super(props)
 
     this.renderHeaderButtons = this.renderHeaderButtons.bind(this)
+    this.getLinkStyles = this.getLinkStyles.bind(this)
   }
 
   renderHeaderButtons () {
-    if (this.props.authenticated) {
-      const authButtons = [
-        <Link key="logout" to='/' onClick={this.props.logout} className={styles.button}>LOG OUT</Link>,
-        <Link key="profile" to='/profile' className={styles.button}>PROFILE</Link>
-      ]
-      if (this.props.user.usertype === 'contact') {
-        return [
-          <Link key="create-project" to='/create-project' className={styles.button}>CREATE PROJECT</Link>,
-          ...authButtons
-        ]
-      } else {
-        return authButtons
-      }
+    const { authenticated, user } = this.props
+
+    if (authenticated) {
+      return (
+        <Fragment>
+          { user.usertype === 'contact' &&
+            <Button dense className={this.getLinkStyles('create-project')}
+              component={Link}
+              to="/create-project">
+              {'CREATE PROJECT'}
+            </Button>
+          }
+          <Button dense className={this.getLinkStyles()}
+            component={Link}
+            to="/"
+            onClick={this.props.logout}>
+            {'LOGOUT'}
+          </Button>
+          <Button dense className={this.getLinkStyles('profile')}
+            component={Link}
+            to="/profile">
+            <Avatar>{user.email.charAt(0).toUpperCase()}</Avatar>
+          </Button>
+        </Fragment>
+      )
     } else {
-      return ([
-        <Link key='signup' to='/signup' className={styles.button}>SIGN UP</Link>,
-        <Link key='login' to='/login' className={styles.button}>LOGIN</Link>
-      ])
+      return (
+        <Fragment>
+          <Button dense className={this.getLinkStyles('signup')}
+            component={Link}
+            to="/signup">
+            {'SIGN UP'}
+          </Button>
+          <Button dense className={this.getLinkStyles('login')}
+            component={Link}
+            to="/login">
+            {'LOG IN'}
+          </Button>
+        </Fragment>
+      )
     }
+  }
+
+  getLinkStyles (page) {
+    return this.props.currentPage.includes(page)
+      ? `${styles.button} ${styles.active}`
+      : `${styles.button}`
   }
 
   render () {
     return (
-      <header className={styles.header}>
-        <Link to='/'>
-          <img className={styles.logo} src={require('../../images/logo.png')} />
-        </Link>
-        <div className={styles.buttons}>
+      <AppBar className={styles.header}
+        position="static"
+        color="inherit"
+        elevation={0}>
+        <Toolbar>
+          <Typography className={`${styles.button} ${styles.flex}`}
+            type="title" color="inherit"
+            component={Link}
+            to="/">
+            {'calltocode'}
+          </Typography>
+
           {this.renderHeaderButtons()}
-        </div>
-      </header>
+        </Toolbar>
+      </AppBar>
     )
   }
 }
@@ -52,6 +93,7 @@ class Header extends Component {
 function mapStateToProps (state) {
   return {
     authenticated: state.auth.authenticated,
+    currentPage: state.routing.location.pathname,
     user: state.user
   }
 }
@@ -62,6 +104,7 @@ const mapDispatchToProps = {
 
 Header.propTypes = {
   authenticated: PropTypes.bool.isRequired,
+  currentPage: PropTypes.string.isRequired,
   logout: PropTypes.func.isRequired,
   user: PropTypes.object.isRequired
 }

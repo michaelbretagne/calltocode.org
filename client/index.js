@@ -1,6 +1,6 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
-import MuiThemeProvider from 'material-ui/styles/MuiThemeProvider'
+import { MuiThemeProvider, createMuiTheme } from 'material-ui/styles'
 import createHistory from 'history/createBrowserHistory'
 import { createStore, combineReducers, applyMiddleware } from 'redux'
 import { createLogger } from 'redux-logger'
@@ -12,7 +12,7 @@ import thunkMiddleware from 'redux-thunk'
 import localStorageMiddleware from './middleware/localStorageMiddleware'
 import promiseMiddleware from './middleware/promiseMiddleware'
 
-import './index.css'
+import './scss/main.scss'
 import App from './App'
 import reducers from './reducers'
 
@@ -30,16 +30,18 @@ const store = createStore(
   applyMiddleware(
     navigationMiddleware,
     loggerMiddleware,
-    localStorageMiddleware,
     promiseMiddleware,
-    thunkMiddleware
+    thunkMiddleware,
+    localStorageMiddleware
   )
 )
+
+const theme = createMuiTheme()
 
 ReactDOM.render(
   <Provider store={store}>
     <ConnectedRouter history={browserHistory}>
-      <MuiThemeProvider>
+      <MuiThemeProvider theme={theme}>
         <Switch>
           <Route path="/" component={App} />
         </Switch>

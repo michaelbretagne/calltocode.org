@@ -11,17 +11,16 @@ const mongod = new MongodbMemoryServer()
 
 async function before (t) {
   const mongoUri = await mongod.getConnectionString()
-  const options = { useMongoClient: true }
   mongoose.Promise = global.Promise
-  mongoose.connect(mongoUri, options)
+  mongoose.connect(mongoUri)
 }
 
 async function beforeEach (t) {
-  const projects = seedProjects.map(formatData)
+  const projects = seedProjects.map(formatObjectIDs)
   await saveData(projects, Project)
   t.context.projects = projects
 
-  const users = seedUsers.map(formatData)
+  const users = seedUsers.map(formatObjectIDs)
   await saveData(users, User)
   t.context.users = users
 
@@ -38,10 +37,13 @@ async function after (t) {
   mongod.stop()
 }
 
-function formatData (data) {
-  return data['_id']['$oid']
-    ? { ...data, _id: data['_id']['$oid'] }
-    : { ...data }
+function formatObjectIDs (data) {
+  const newData = {}
+
+  const oid = '$oid'
+  for (const prop in data) newData[prop] = data[prop][oid] ? data[prop][oid] : data[prop]
+
+  return newData
 }
 
 async function saveData (dataArr, Model) {
