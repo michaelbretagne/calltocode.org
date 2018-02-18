@@ -1,4 +1,4 @@
-const mongoose = require('mongoose')
+import mongoose from 'mongoose'
 
 const ProjectSchema = mongoose.Schema({
   organization: {
@@ -7,7 +7,15 @@ const ProjectSchema = mongoose.Schema({
   },
   name: String,
   role: String,
-  email: String
+  email: String,
+  causes: [{
+    type: String,
+    enum: ['Animal', 'Environment', 'International NGO', 'Health', 'Education', 'Arts & Culture', 'Other']
+  }],
+  applications: [{
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'Application'
+  }]
 }, { timestamps: true })
 
 ProjectSchema.methods.toJSON = function () {
@@ -16,10 +24,12 @@ ProjectSchema.methods.toJSON = function () {
     organization: this.organization,
     name: this.name,
     role: this.role,
-    email: this.email
+    email: this.email,
+    causes: this.causes,
+    applications: this.applications,
+    createdAt: this.createdAt,
+    updatedAt: this.updatedAt
   }
 }
 
-const Project = mongoose.model('Project', ProjectSchema)
-
-module.exports = Project
+export default mongoose.model('Project', ProjectSchema)
